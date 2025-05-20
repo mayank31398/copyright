@@ -5,8 +5,10 @@
 import os
 from argparse import ArgumentParser
 
+
 parser = ArgumentParser()
 parser.add_argument("--repo", type=str, required=True)
+parser.add_argument("--exclude", type=str, nargs="+", default=[], required=False)
 parser.add_argument("--header", type=str, required=True)
 args = parser.parse_args()
 
@@ -24,7 +26,7 @@ _PYTHON_LIKE_EXTENSIONS = [
 ]
 _HTML_LIKE_EXTENSIONS = [".html", ".md"]
 
-_BANNED_DIRECTORIES = [".git", "cutlass"]
+_BANNED_DIRECTORIES = [os.path.realpath(i) for i in [".git"] + args.exclude]
 
 _CPP_HEADER = (
     f"// **************************************************\n"
@@ -44,8 +46,6 @@ _HTML_HEADER = (
     "************************************************** -->\n\n"
 )
 
-directory = os.path.dirname(os.path.dirname(__file__))
-
 
 def _check_and_add_copyright_header(file: str, header: str) -> None:
     code = open(file, "r").read()
@@ -59,10 +59,20 @@ def _check_and_add_copyright_header(file: str, header: str) -> None:
     open(file, "w").writelines([code])
 
 
+def _is_banned_directory(path: str) -> bool:
+    assert not path.endswith("/")
+
+    for banned_directory in _BANNED_DIRECTORIES:
+        if path.startswith(banned_directory):
+            return True
+
+    return False
+
+
 directory = os.path.realpath(args.repo)
 
 for root, dirs, files in os.walk(directory):
-    if any([root.split(directory)[1].startswith(f"/{banned_directory}") for banned_directory in _BANNED_DIRECTORIES]):
+    if _is_banned_directory(root):
         continue
 
     for file in files:
