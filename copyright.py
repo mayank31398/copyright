@@ -34,21 +34,27 @@ if args.exclude:
 
 _BANNED = [os.path.realpath(i) for i in _BANNED]
 
+def _make_header(header: str, comment_char: str) -> str:
+    header = header.split("\n")
+    header = [f"{comment_char} {i}" for i in header]
+    header = "\n".join(header)
+    return header
+
 _CPP_HEADER = (
-    f"// **************************************************\n"
-    f"// {args.header}\n"
+    "// **************************************************\n"
+    f"{_make_header(args.header, "//")}"
     "// **************************************************\n\n"
 )
 
 _PYTHON_HEADER = (
-    f"# **************************************************\n"
-    f"# {args.header}\n"
+    "# **************************************************\n"
+    f"{_make_header(args.header, "#")}"
     "# **************************************************\n\n"
 )
 
 _HTML_HEADER = (
-    f"<!-- **************************************************\n"
-    f"{args.header}\n"
+    "<!-- **************************************************\n"
+    f"{_make_header(args.header, "")}"
     "************************************************** -->\n\n"
 )
 
