@@ -73,13 +73,13 @@ _AUTHOR_MAP: dict[str, dict[str, int]] = {}
 
 def _get_git_authors(file: str) -> list[str]:
     counts = _AUTHOR_MAP.get(os.path.realpath(file), {})
-    return [a for a, _ in sorted(counts.items(), key=lambda x: (-x[1], x[0]))]
+    return sorted(counts.keys())
 
 
 def _resolve_copyright_line(file: str) -> str:
     authors = _get_git_authors(file)
     if args.extra_name and args.extra_name not in authors:
-        authors = [args.extra_name] + authors
+        authors = sorted(authors + [args.extra_name])
     if authors:
         return args.header.replace("__authors__", ", ".join(authors))
     return args.header.replace(", __authors__", "").replace("__authors__", "")
