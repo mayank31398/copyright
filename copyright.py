@@ -39,7 +39,7 @@ def _make_header(header: str, comment_char: str) -> str:
     header = header.split("\n")
     header = [f"{comment_char} {i}" for i in header]
     header = "\n".join(header)
-    return header
+    return header + "\n"
 
 
 def _make_pattern(header: str) -> re.Pattern:
