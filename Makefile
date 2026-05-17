@@ -6,5 +6,5 @@ update-precommit:
 	pre-commit autoupdate
 
 style:
-	python copyright.py --repo ./ --header "Copyright (c) $$(date +%Y), Mayank Mishra"
+	python copyright.py --repo ./ --header "Copyright (c) $$(date +%Y), __authors__"
 	pre-commit run --all-files
