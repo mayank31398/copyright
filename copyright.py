@@ -37,14 +37,18 @@ _BANNED = [os.path.realpath(i) for i in _BANNED]
 
 def _make_header(header: str, comment_char: str) -> str:
     header = header.split("\n")
-    header = [f"{comment_char} {i}" for i in header]
+    if comment_char:
+        header = [f"{comment_char} {i}" for i in header]
     header = "\n".join(header)
     return header + "\n"
 
 
 def _make_pattern(header: str) -> re.Pattern:
-    pattern = re.escape(header)
-    pattern = re.sub(r"\d{4}", r"\\d{4}", pattern)
+    parts = [re.escape(line) for line in header.split("\n")]
+    pattern = r"\n".join(parts)
+    pattern = re.sub(r"\d{4}", r"\\d{4}", pattern, count=1)
+    # Match optional leading whitespace before "Copyright" to handle format variations
+    pattern = pattern.replace(r"\nCopyright", r"\n\s*Copyright")
     return re.compile(pattern)
 
 
@@ -77,8 +81,9 @@ def _check_and_add_copyright_header(file: str, header: str, pattern: re.Pattern)
     if len(code) == 0:
         return
 
-    if pattern.match(code):
-        code = pattern.sub(header, code, count=1)
+    code_stripped = pattern.sub("", code)
+    if code_stripped != code:
+        code = f"{header}{code_stripped.lstrip(chr(10))}"
     elif not code.startswith(header):
         code = f"{header}{code}"
 
