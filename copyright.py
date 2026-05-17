@@ -121,7 +121,7 @@ def _check_and_add_copyright_header(file: str, build_header_fn, pattern: re.Patt
     header = build_header_fn(file)
     code_stripped = pattern.sub("", code)
     if code_stripped != code:
-        code = f"{header}{code_stripped.lstrip(chr(10))}"
+        code = f"{header}{code_stripped}"
     elif not code.startswith(header):
         code = f"{header}{code}"
 
