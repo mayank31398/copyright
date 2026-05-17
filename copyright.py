@@ -44,26 +44,35 @@ def _make_header(header: str, comment_char: str) -> str:
     return header + "\n"
 
 
-def _get_git_authors(file: str) -> list[str]:
-    result = subprocess.run(
-        ["git", "log", "--follow", "--numstat", "--format=%an", "--", file],
-        capture_output=True,
-        text=True,
-    )
-    contributions: dict[str, int] = {}
+def _build_author_map(repo: str) -> dict[str, dict[str, int]]:
+    """Run git log once and return {abs_path: {author: commit_count}}."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", repo, "log", "--name-only", "--format=%x00%an"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        return {}
+    author_map: dict[str, dict[str, int]] = {}
     current_author = None
     for line in result.stdout.splitlines():
-        if not line:
-            continue
-        parts = line.split("\t")
-        if len(parts) == 3:
-            try:
-                contributions[current_author] = contributions.get(current_author, 0) + int(parts[0])
-            except (ValueError, TypeError):
-                pass
-        else:
-            current_author = line
-    return [a for a, _ in sorted(contributions.items(), key=lambda x: (-x[1], x[0]))]
+        if line.startswith("\x00"):
+            current_author = line[1:]
+        elif line and current_author:
+            abs_path = os.path.realpath(os.path.join(repo, line))
+            counts = author_map.setdefault(abs_path, {})
+            counts[current_author] = counts.get(current_author, 0) + 1
+    return author_map
+
+
+_AUTHOR_MAP: dict[str, dict[str, int]] = {}
+
+
+def _get_git_authors(file: str) -> list[str]:
+    counts = _AUTHOR_MAP.get(os.path.realpath(file), {})
+    return [a for a, _ in sorted(counts.items(), key=lambda x: (-x[1], x[0]))]
 
 
 def _resolve_copyright_line(file: str) -> str:
@@ -130,6 +139,7 @@ def _is_banned(path: str) -> bool:
 
 
 directory = os.path.realpath(args.repo)
+_AUTHOR_MAP = _build_author_map(directory)
 
 for root, dirs, files in os.walk(directory):
     if _is_banned(root):
