@@ -1,10 +1,10 @@
 # **************************************************
-# Copyright (c) 2025, Mayank Mishra
+# Copyright (c) 2026, Mayank Mishra
 # **************************************************
 
 update-precommit:
 	pre-commit autoupdate
 
 style:
-	python copyright.py --repo ./ --header "Copyright (c) 2025, Mayank Mishra"
+	python copyright.py --repo ./ --header "Copyright (c) $$(date +%Y), __authors__"
 	pre-commit run --all-files
