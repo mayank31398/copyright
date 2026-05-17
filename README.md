@@ -1,5 +1,5 @@
 <!-- **************************************************
-Copyright (c) 2025, Mayank Mishra
+Copyright (c) 2026, Mayank Mishra
 ************************************************** -->
 
 This repository contains a barebones script to copyright an entire repository.
