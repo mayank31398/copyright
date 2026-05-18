@@ -78,8 +78,8 @@ def _get_git_authors(file: str) -> list[str]:
 
 def _resolve_copyright_line(file: str) -> str:
     authors = _get_git_authors(file)
-    if args.extra_name and args.extra_name not in authors:
-        authors = sorted(authors + [args.extra_name])
+    if args.extra_name:
+        authors = [args.extra_name] + sorted(a for a in authors if a != args.extra_name)
     if authors:
         return args.header.replace("__authors__", ", ".join(authors))
     return args.header.replace(", __authors__", "").replace("__authors__", "")
