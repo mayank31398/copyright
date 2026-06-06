@@ -12,6 +12,7 @@ parser.add_argument("--repo", type=str, required=True)
 parser.add_argument("--exclude", type=str, required=False)
 parser.add_argument("--header", type=str, required=True)
 parser.add_argument("--extra-name", type=str, required=False)
+parser.add_argument("--no-contributors", action="store_true", required=False)
 args = parser.parse_args()
 
 
@@ -77,6 +78,10 @@ def _get_git_authors(file: str) -> list[str]:
 
 
 def _resolve_copyright_line(file: str) -> str:
+    if args.no_contributors:
+        if args.extra_name:
+            return args.header.replace("__authors__", args.extra_name)
+        return args.header.replace(", __authors__", "").replace("__authors__", "")
     authors = _get_git_authors(file)
     if args.extra_name:
         authors = [args.extra_name] + sorted(a for a in authors if a != args.extra_name)
@@ -142,7 +147,7 @@ def _is_banned(path: str) -> bool:
 
 
 directory = os.path.realpath(args.repo)
-_AUTHOR_MAP = _build_author_map(directory)
+_AUTHOR_MAP = {} if args.no_contributors else _build_author_map(directory)
 
 for root, dirs, files in os.walk(directory):
     if _is_banned(root):
