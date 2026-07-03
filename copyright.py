@@ -7,7 +7,6 @@ import re
 import subprocess
 from argparse import ArgumentParser
 
-
 parser = ArgumentParser()
 parser.add_argument("--repo", type=str, required=True)
 parser.add_argument("--exclude", type=str, required=False)
