@@ -7,6 +7,7 @@ import re
 import subprocess
 from argparse import ArgumentParser
 
+
 parser = ArgumentParser()
 parser.add_argument("--repo", type=str, required=True)
 parser.add_argument("--exclude", type=str, required=False)
@@ -146,7 +147,7 @@ def _is_banned(path: str) -> bool:
     assert not path.endswith("/")
 
     for banned_directory in _BANNED:
-        if path.startswith(banned_directory):
+        if path == banned_directory or path.startswith(banned_directory + os.sep):
             return True
 
     return False
